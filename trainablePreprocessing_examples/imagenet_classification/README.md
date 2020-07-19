@@ -7,7 +7,7 @@ This implements training of popular model architectures, such as ResNet, AlexNet
 To train a model, run `main.py` with the desired model architecture and the path to the ImageNet dataset:
 
 ```bash
-python main.py -a preproc_resnet18 [imagenet-folder with train and val folders] --preproc_mode trained_dithering --input_bit_width 4
+python main.py -a preproc_resnet18 --preproc_mode trained_dithering --input_bit_width 4 [imagenet-folder with train and val folders]
 ```
 
 ## Usage
