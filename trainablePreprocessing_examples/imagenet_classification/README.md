@@ -1,4 +1,4 @@
-# ImageNet training in PyTorch with Trainable Prperocessing
+# ImageNet training in PyTorch with Trainable Preprocessing
 
 This implements training of popular model architectures, such as ResNet, AlexNet, and VGG on the ImageNet dataset with trainable preprocessing such as trained color conversion and trained dithering.
 
