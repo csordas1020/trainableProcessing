@@ -25,7 +25,7 @@ Tensor preproc_backward(Tensor& grad_output,
                         const int n_batch,
                         const int n_ch,
                         const int n_row,
-                        const int n_col);*/
+                        const int n_col);
 
 class Dither2dSteFn : public torch::autograd::Function<Dither2dSteFn> {
     public:
