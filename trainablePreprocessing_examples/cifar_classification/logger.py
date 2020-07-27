@@ -86,10 +86,6 @@ class Logger(object):
         self.log = logging.getLogger('log')
         self.log.setLevel(logging.INFO)
 
-        #Add git hashes to config
-        self.config.version = self.get_repo_version()
-        self.config.quantization_version = self.get_quantization_version()
-
         # Stout logging
         out_hdlr = logging.StreamHandler(sys.stdout)
         out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
@@ -115,20 +111,6 @@ class Logger(object):
     def tb_histogram(self, name, tensor, iter):
         if not self.args.dry_run:
             self.writer.add_histogram(name, tensor, iter)
-
-    def get_repo_version(self):
-        repo = git.Repo(search_parent_directories=False)
-        sha = repo.head.object.hexsha
-        return sha
-
-    def get_quantization_version(self):
-        python_path = os.environ['PYTHONPATH'].split(os.pathsep)
-        for path in python_path:
-            name = os.path.basename(os.path.normpath(path))
-            if 'quantization' in name:
-                repo = git.Repo(path, search_parent_directories=True)
-                sha = repo.head.object.hexsha
-                return sha
 
     def log_config(self):
         self.info(self.config)

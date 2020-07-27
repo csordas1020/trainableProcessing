@@ -10,4 +10,4 @@ put yml here
 
 # Run code:
 
-PYTORCH_JIT=1 python main.py --network VGG_preproc --dataset CIFAR10 --experiments ./results/ --preproc_mode trained_dithering --input_bit_width 1
+PYTORCH_JIT=1 python main.py --network VGG11_preproc --dataset CIFAR10 --experiments ./results/ --preproc_mode trained_dithering --input_bit_width 1

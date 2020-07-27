@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
-from torch.utils.cpp_extension import BuildExtension, CUDAExtension
+from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CppExtension
+
 
 setup(name='trainablePreprocessing',
       version='1.0',

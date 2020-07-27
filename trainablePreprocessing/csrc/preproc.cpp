@@ -25,7 +25,7 @@ Tensor preproc_backward(Tensor& grad_output,
                         const int n_batch,
                         const int n_ch,
                         const int n_row,
-                        const int n_col);
+                        const int n_col);*/
 
 class Dither2dSteFn : public torch::autograd::Function<Dither2dSteFn> {
     public:
@@ -75,5 +75,6 @@ Tensor dither2d_ste(const Tensor& input,
     return Dither2dSteFn::apply(input, dither_ker, bit_width)[0];
 }
 
-static auto registry =
-    torch::RegisterOperators().op("preproc::dither2d_ste", &dither2d_ste);
+PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
+  m.def("dither2d_ste", &dither2d_ste, "CUDA 2D dithering");
+}
