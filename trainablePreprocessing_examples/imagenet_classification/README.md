@@ -2,6 +2,11 @@
 
 This implements training of popular model architectures, such as ResNet, AlexNet, and VGG on the ImageNet dataset with trainable preprocessing such as trained color conversion and trained dithering.
 
+## Prerequisites
+
+* PyTorch (last tested with v1.4.0)
+* Torchvision (last tested with v0.5.0)
+
 ## Training
 
 To train a model, run `main.py` with the desired model architecture and the path to the ImageNet dataset:
