@@ -54,13 +54,13 @@ class PreprocMobileNetV1(MobileNet):
 
     def __init__(
             self,
-            bit_width,
             channels,
-            first_layer_bit_width,
             first_stage_stride,
             input_norm_mean,
             input_norm_std,
             input_channels,
+            first_layer_bit_width,
+            bit_width,
             preproc_mode='quant', colortrans=False, input_bit_width=8):
         super(PreprocMobileNetV1, self).__init__(
             channels,
@@ -85,12 +85,10 @@ class PreprocMobileNetV1(MobileNet):
         return x
 
 
-def preproc_mobilenet_v1(pretrained=True, **kwargs):
+def _preproc_mobilenet_v1(pretrained, first_layer_bit_width, bit_width, **kwargs):
     first_stage_stride = False
     channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 512], [1024, 1024]]
     orig_quant_mobilenet_v1_4b, cfg = model_with_cfg('quant_mobilenet_v1_4b', pretrained=pretrained)
-    bit_width = cfg.getint('QUANT', 'BIT_WIDTH')
-    first_layer_bit_width = cfg.getint('QUANT', 'FIRST_LAYER_BIT_WIDTH')
     width_scale = float(cfg.get('MODEL', 'WIDTH_SCALE'))
     input_channels = 3
     mean = [float(cfg.get('PREPROCESS', 'MEAN_0')),
@@ -102,8 +100,16 @@ def preproc_mobilenet_v1(pretrained=True, **kwargs):
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
     net = PreprocMobileNetV1(
-        bit_width, channels, first_layer_bit_width, first_stage_stride, mean, std, input_channels, **kwargs)
+        channels, first_stage_stride, mean, std, input_channels, first_layer_bit_width, bit_width, **kwargs)
     if pretrained:
         orig_state_dict = orig_quant_mobilenet_v1_4b.state_dict()
         net.load_state_dict(orig_state_dict, strict=False)
     return net
+
+
+def preproc_mobilenet_v1_4b(pretrained=True, **kwargs):
+    return _preproc_mobilenet_v1(pretrained, 4, 4, **kwargs)
+
+
+def preproc_mobilenet_v1_3b(pretrained=True, **kwargs):
+    return _preproc_mobilenet_v1(pretrained, 3, 3, **kwargs)
