@@ -92,6 +92,8 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
+parser.add_argument('--retrain', dest='retrain', action='store_true',
+                    help='Retrain resumed model')
 parser.add_argument('--seed', default=123456, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=None, type=int,
@@ -166,15 +168,16 @@ def main_worker(gpu, ngpus_per_node, args):
                 # Map model to be loaded to specified single gpu.
                 loc = 'cuda:{}'.format(args.gpu)
                 checkpoint = torch.load(args.resume, map_location=loc)
-            args.start_epoch = checkpoint['epoch']
-            best_acc1 = checkpoint['best_acc1']
-            if args.gpu is not None:
-                # best_acc1 may be from a checkpoint from a different GPU
-                best_acc1 = best_acc1.to(args.gpu)
             model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.resume, checkpoint['epoch']))
+            if not args.retrain:
+                optimizer.load_state_dict(checkpoint['optimizer'])
+                args.start_epoch = checkpoint['epoch']
+                best_acc1 = checkpoint['best_acc1']
+                if args.gpu is not None:
+                    # best_acc1 may be from a checkpoint from a different GPU
+                    best_acc1 = best_acc1.to(args.gpu)
+                print("=> loaded checkpoint '{}' (epoch {})"
+                    .format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
