@@ -6,6 +6,7 @@ This implements training of popular model architectures, such as ResNet, AlexNet
 
 * PyTorch (last tested with v1.4.0)
 * Torchvision (last tested with v0.5.0)
+* Brevitas (branch quant_mobilenet_v1_4b-r2 to access latest MobileNet V1 release)
 
 ## Training
 

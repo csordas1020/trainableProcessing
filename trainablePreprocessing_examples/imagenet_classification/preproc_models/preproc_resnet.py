@@ -61,36 +61,48 @@ def preproc_resnet18(**kwargs):
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
     """
+    assert(not kwargs['pretrained']), 'Not supported'
+    del kwargs['pretrained']
     return PreprocResNet(resnet.BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
 def preproc_resnet34(**kwargs):
     r"""ResNet-34 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     return PreprocResNet(resnet.BasicBlock, [3, 4, 6, 3], **kwargs)
 
 
 def preproc_resnet50(**kwargs):
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     return PreprocResNet(resnet.Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
 def preproc_resnet101(**kwargs):
     r"""ResNet-101 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     return PreprocResNet(resnet.Bottleneck, [3, 4, 23, 3], **kwargs)
 
 
 def preproc_resnet152(**kwargs):
     r"""ResNet-152 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     return PreprocResNet(resnet.Bottleneck, [3, 8, 36, 3], **kwargs)
 
 
 def preproc_resnext50_32x4d(**kwargs):
     r"""ResNeXt-50 32x4d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     kwargs['groups'] = 32
     kwargs['width_per_group'] = 4
     return PreprocResNet(resnet.Bottleneck, [3, 4, 6, 3], **kwargs)
@@ -99,6 +111,8 @@ def preproc_resnext50_32x4d(**kwargs):
 def preproc_resnext101_32x8d(**kwargs):
     r"""ResNeXt-101 32x8d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_"""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     kwargs['groups'] = 32
     kwargs['width_per_group'] = 8
     return PreprocResNet(resnet.Bottleneck, [3, 4, 23, 3], **kwargs)
@@ -112,6 +126,8 @@ def preproc_wide_resnet50_2(**kwargs):
     which is twice larger in every block. The number of channels in outer 1x1
     convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
     channels, and in Wide ResNet-50-2 has 2048-1024-2048."""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     kwargs['width_per_group'] = 64 * 2
     return PreprocResNet(resnet.Bottleneck, [3, 4, 6, 3], **kwargs)
 
@@ -124,5 +140,7 @@ def preproc_wide_resnet101_2(**kwargs):
     which is twice larger in every block. The number of channels in outer 1x1
     convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
     channels, and in Wide ResNet-50-2 has 2048-1024-2048."""
+    assert not kwargs['pretrained'], 'Not supported'
+    del kwargs['pretrained']
     kwargs['width_per_group'] = 64 * 2
     return PreprocResNet(resnet.Bottleneck, [3, 4, 23, 3], **kwargs)
