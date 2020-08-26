@@ -78,6 +78,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
+parser.add_argument('--lr_decay_interval', default=30, type=int, help='learning rate decay interval')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
@@ -87,11 +88,15 @@ parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
+parser.add_argument('--resume-strict', action='store_true', default=False,
+                    help='Strict state dict loading during resuming')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
-parser.add_argument('--seed', default=None, type=int,
+parser.add_argument('--retrain', dest='retrain', action='store_true',
+                    help='Retrain resumed model')
+parser.add_argument('--seed', default=123456, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=None, type=int,
                     help='GPU id to use.')
@@ -124,8 +129,11 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # create model
     if args.preproc_mode is not None:
-        model = preproc_models.__dict__[args.arch](preproc_mode=args.preproc_mode, colortrans=args.colortrans,
-                                                input_bit_width=args.input_bit_width)
+        model = preproc_models.__dict__[args.arch](
+            preproc_mode=args.preproc_mode,
+            colortrans=args.colortrans,
+            input_bit_width=args.input_bit_width,
+            pretrained=args.pretrained)
     else:
         if args.pretrained:
             print("=> using pre-trained model '{}'".format(args.arch))
@@ -162,15 +170,16 @@ def main_worker(gpu, ngpus_per_node, args):
                 # Map model to be loaded to specified single gpu.
                 loc = 'cuda:{}'.format(args.gpu)
                 checkpoint = torch.load(args.resume, map_location=loc)
-            args.start_epoch = checkpoint['epoch']
-            best_acc1 = checkpoint['best_acc1']
-            if args.gpu is not None:
-                # best_acc1 may be from a checkpoint from a different GPU
-                best_acc1 = best_acc1.to(args.gpu)
-            model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.resume, checkpoint['epoch']))
+            model.load_state_dict(checkpoint['state_dict'], strict=args.resume_strict)
+            if not args.retrain:
+                optimizer.load_state_dict(checkpoint['optimizer'])
+                args.start_epoch = checkpoint['epoch']
+                best_acc1 = checkpoint['best_acc1']
+                if args.gpu is not None:
+                    # best_acc1 may be from a checkpoint from a different GPU
+                    best_acc1 = best_acc1.to(args.gpu)
+                print("=> loaded checkpoint '{}' (epoch {})"
+                    .format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
@@ -179,8 +188,6 @@ def main_worker(gpu, ngpus_per_node, args):
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
 
     train_dataset = datasets.ImageFolder(
         traindir,
@@ -188,7 +195,6 @@ def main_worker(gpu, ngpus_per_node, args):
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            #normalize,
         ]))
 
     train_loader = torch.utils.data.DataLoader(
@@ -200,7 +206,6 @@ def main_worker(gpu, ngpus_per_node, args):
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
-            #normalize,
         ])),
         batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
@@ -210,7 +215,7 @@ def main_worker(gpu, ngpus_per_node, args):
         return
 
     for epoch in range(args.start_epoch, args.epochs):
-        adjust_learning_rate(optimizer, epoch, args)
+        adjust_learning_rate(optimizer, epoch, args.lr, args.lr_decay_interval)
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
@@ -367,9 +372,9 @@ class ProgressMeter(object):
         return '[' + fmt + '/' + fmt.format(num_batches) + ']'
 
 
-def adjust_learning_rate(optimizer, epoch, args):
+def adjust_learning_rate(optimizer, epoch, starting_lr, decay_interval):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 30))
+    lr = starting_lr * (0.1 ** (epoch // decay_interval))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
